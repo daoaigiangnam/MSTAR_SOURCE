@@ -1,0 +1,75 @@
+name: Database Foundation Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  database-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: rental_test
+          MYSQL_USER: rental
+          MYSQL_PASSWORD: rental
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify repository test baseline
+        run: |
+          test -f docs/04-testing/01-DATABASE-FOUNDATION-TEST-CASES.md
+          test -f docs/03-design/07-DATABASE-DESIGN-V1-APPROVED.md
+
+      - name: Verify MySQL
+        run: |
+          mysql --protocol=tcp -h 127.0.0.1 -P 3306 -urental -prental -e "SELECT VERSION();"
+
+      - name: Run database tests
+        run: |
+          echo "Database migration implementation is not yet present."
+          echo "Foundation test infrastructure is ready; migration tests will become executable when database/migrations is added."
+          test -d database/migrations || exit 0
+          echo "Migration directory detected; executable migration test suite will run in the next implementation step."
+
+      - name: Record test status
+        run: |
+          mkdir -p test-results
+          cat > test-results/database-foundation.md <<'EOF'
+          # Database Foundation Test Result
+
+          ## Execution
+          GitHub Actions workflow: `database-tests`
+
+          ## Current phase
+          Test infrastructure verified. Database migration implementation is not yet part of the repository.
+
+          ## Result
+          PASS — infrastructure/precondition checks only.
+
+          ## Important
+          This PASS does **not** mean DB-TC-001..DB-TC-012 have passed. Functional database tests remain pending until migrations and executable tests are implemented.
+          EOF
+
+      - name: Upload test result
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-foundation-test-result
+          path: test-results/database-foundation.md
