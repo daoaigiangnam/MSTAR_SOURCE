@@ -1,0 +1,16 @@
+Trường,Bắt buộc?,Mô tả/Quy tắc
+Ticket ID,Có,Mã do Bitrix/hệ thống sinh
+Request type / Template,Có,Incident hoặc Service Request và template
+Requester / Customer,Có,Người yêu cầu và đơn vị/khách hàng
+Site / Location,Khi phù hợp,Chi nhánh/site liên quan
+Service / Asset / CI,Có,Dịch vụ hoặc thiết bị ảnh hưởng/yêu cầu
+Mô tả,Có,Hiện tượng/yêu cầu đủ để xử lý
+Business impact,Có với incident,Số người/đơn vị/dịch vụ ảnh hưởng
+Priority,Có,Theo ma trận đã được phê duyệt
+Assignee / Team,Có,Người/nhóm chịu trách nhiệm
+Approver,Khi cần,Manager/Service Owner/Data Owner
+Received / Response / Resolved time,Có,Timestamps để đo SLA
+Status / Waiting reason,Có,Ghi lý do khi chờ requester/vendor
+Work log / Resolution,Có,Thao tác và kết quả; không ghi bí mật
+Evidence / Related IDs,Khi phù hợp,Liên kết log alert asset change backup
+Requester confirmation,Theo quy tắc đóng,Xác nhận kết quả hoặc ghi lý do

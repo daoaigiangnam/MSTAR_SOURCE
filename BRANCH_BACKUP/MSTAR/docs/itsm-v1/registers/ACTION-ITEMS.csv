@@ -1,0 +1,11 @@
+ID,Category,Issue/Decision needed,Risk,Proposed owner,Priority,Target date,Status,Decision/Evidence,Notes
+A01,SLA,Xác nhận Response Time SLA M-Service đang thiếu,Cấu hình/báo cáo SLA có thể sai,IT Lead + Service Owner,High,,Open,,
+A02,SLA,Đối chiếu escalation/overdue sửa chữa bảo hành nội bộ với bảng gốc,Escalation sai mốc,IT Lead + BOD,High,,Open,,
+A03,Security,Loại bỏ mật khẩu khỏi Excel/biên bản; chuyển vault và rotate nếu cần,Rò rỉ thông tin xác thực,IT Lead,Critical,,Open,,Không tải credential thật lên GitHub
+A04,Monitoring,Rà soát SNMP community cố định và NAT UDP/161; ưu tiên SNMPv3/VPN/ACL,Lộ monitoring plane,Network Owner,Critical,,Open,,
+A05,IAM,Phê duyệt chính sách mật khẩu/MFA/khóa tài khoản mới,Chính sách cũ có thể không phù hợp,System Owner,High,,Open,,
+A06,Backup,Chốt RPO/RTO retention và lịch restore test,Không chứng minh khả năng phục hồi,Service Owners,High,,Open,,
+A07,Endpoint,Xác nhận OS/license và đơn vị ổ đĩa 512TB/256GB trong hồ sơ cũ,Mua/cài sai chuẩn,IT Lead + Procurement,Medium,,Open,,
+A08,Network,Lập sơ đồ as-built theo site với IP/VLAN/WAN/VPN/owner,Khó xử lý incident/change,Network Owner,High,,Open,,
+A09,Governance,Chốt RACI phê duyệt lưu hồ sơ và chu kỳ review,Không rõ trách nhiệm,IT Lead + BOD,High,,Open,,
+A10,Scope,Xác nhận phạm vi nội bộ MSTAR hay gồm M-Care/M-Service,Nhầm owner/SLA,Service Owner,High,,Open,,
