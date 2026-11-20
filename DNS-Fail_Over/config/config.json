@@ -1,0 +1,60 @@
+{
+    "settings": {
+
+        "timeout": 5,
+
+        "retry": 3,
+
+        "retry_delay": 2,
+
+        "fail_threshold": 2,
+
+        "restore_threshold": 2,
+
+        "restore_primary": true,
+
+        "check_methods": [
+
+            {
+                "type": "ping",
+                "enable": false
+            },
+
+            {
+                "type": "tcp",
+                "port": 8080,
+                "enable": true
+            },
+
+            {
+                "type": "tcp",
+                "port": 80,
+                "enable": false
+            },
+
+            {
+                "type": "https",
+                "url": "/",
+                "enable": false
+            }
+
+        ]
+
+    },
+
+    "wan": [
+
+        {
+            "name": "VNPT",
+            "ip": "14.161.10.44",
+            "priority": 1
+        },
+
+        {
+            "name": "VIETTEL",
+            "ip": "27.74.254.52",
+            "priority": 2
+        }
+
+    ]
+}
