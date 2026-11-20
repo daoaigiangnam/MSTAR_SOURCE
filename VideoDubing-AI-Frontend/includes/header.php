@@ -1,0 +1,2 @@
+<?php if (!isset($pageTitle)) $pageTitle = APP_NAME; ?>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= htmlspecialchars($pageTitle) ?></title><link rel="stylesheet" href="/assets/css/app.css"><link rel="stylesheet" href="/assets/css/layout.css"><link rel="stylesheet" href="/assets/css/responsive.css"><link rel="stylesheet" href="/assets/css/v1.css"></head><body><div class="app-shell">
