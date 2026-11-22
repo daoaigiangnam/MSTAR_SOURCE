@@ -1,0 +1,67 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: ./data/videodubing.db
+      STORAGE_PATH: /app/storage
+      WORKER_URL: http://worker:8000
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?Set INTERNAL_TOKEN in .env}
+    volumes:
+      - ./storage:/app/storage
+      - ./api/data:/app/data
+    depends_on:
+      worker:
+        condition: service_healthy
+
+  worker:
+    build: ./worker
+    expose:
+      - "8000"
+    environment:
+      API_URL: http://api:3000
+      STORAGE_PATH: /app/storage
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?Set INTERNAL_TOKEN in .env}
+      TRANSLATION_ENDPOINT: http://libretranslate:5000
+      TTS_VOICE: ""
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      libretranslate:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  cleanup:
+    build: ./cleanup
+    restart: unless-stopped
+    environment:
+      CLEANUP_ENABLED: ${CLEANUP_ENABLED:-false}
+      CLEANUP_TTL_HOURS: ${CLEANUP_TTL_HOURS:-2}
+      CLEANUP_INTERVAL_MINUTES: ${CLEANUP_INTERVAL_MINUTES:-5}
+      JOBS_DIR: /app/storage/downloads
+      DATABASE_PATH: ./api/data/videodubing.db
+    volumes:
+      - ./storage:/app/storage
+      - ./api/data:/app/api-data
+
+  libretranslate:
+    image: libretranslate/libretranslate:v1.9.6
+    expose:
+      - "5000"
+    environment:
+      # Vietnamese dubbing needs Chinese -> Vietnamese as well as English -> Vietnamese.
+      LT_LOAD_ONLY: en,vi,zh
+    healthcheck:
+      test: ["CMD-SHELL", "./venv/bin/python scripts/healthcheck.py"]
+      interval: 10s
+      timeout: 4s
+      retries: 4
+      start_period: 10s
+    restart: unless-stopped
