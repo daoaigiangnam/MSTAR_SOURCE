@@ -1,0 +1,37 @@
+name: AI Integration
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  ai-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+      - name: Install media toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Install worker dependencies
+        working-directory: worker
+        run: python -m pip install -r requirements.txt pytest
+      - name: Verify media toolchain
+        run: |
+          ffmpeg -version
+          ffprobe -version
+      - name: Run deterministic media and audio tests
+        working-directory: worker
+        run: python -m pytest -q tests/test_media_fixture.py tests/test_audio_pipeline.py tests/test_media_pipeline.py

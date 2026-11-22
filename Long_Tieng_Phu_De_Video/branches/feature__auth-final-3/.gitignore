@@ -1,0 +1,29 @@
+node_modules/
+.env
+.env.*
+!.env.example
+storage/*
+!storage/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+.pytest_cache/
+.venv/
+
+# Server SSH keys
+id_videodubbing
+id_videodubbing.pub
+
+# Runtime / local files
+api/data/*.db-shm
+api/data/*.db-wal
+docker-compose.yml.bak*
+
+# Server SSH keys
+id_videodubbing
+id_videodubbing.pub
+
+# Runtime database files
+api/data/*.db-shm
+api/data/*.db-wal

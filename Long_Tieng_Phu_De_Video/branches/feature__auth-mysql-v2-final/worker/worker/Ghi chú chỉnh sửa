@@ -1,0 +1,8 @@
+worker/worker/dubbing.py  sua :
+
+
+DUB_GLOBAL_MAX_SPEED = 1.60  thannh DUB_GLOBAL_MAX_SPEED = 2.00
+
+De sua loi Translated speech is too long to fit the source video cho Video cuc ngan
+
+Built lai worker : docker compose up -d --build worker

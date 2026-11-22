@@ -1,0 +1,77 @@
+name: AI Model Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  models:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+      - name: Install worker dependencies
+        working-directory: worker
+        run: python -m pip install -r requirements.txt pytest
+      - name: Verify AI imports
+        working-directory: worker
+        run: python -c "import faster_whisper, demucs, edge_tts; print('AI dependencies imported successfully')"
+      - name: Verify Edge TTS provider with retry
+        working-directory: worker
+        run: |
+          python - <<'PY'
+          import asyncio
+          import edge_tts
+          import time
+
+          async def check():
+              last = None
+              for attempt in range(3):
+                  try:
+                      voices = await edge_tts.list_voices()
+                      if not voices:
+                          raise RuntimeError("Edge TTS returned no voices")
+                      print(f"Edge TTS provider reachable: {len(voices)} voices")
+                      return
+                  except Exception as exc:
+                      last = exc
+                      if attempt < 2:
+                          time.sleep(5 * (attempt + 1))
+              raise last
+
+          asyncio.run(check())
+          PY
+      - name: Verify Whisper model initialization with retry
+        working-directory: worker
+        run: |
+          python - <<'PY'
+          from faster_whisper import WhisperModel
+          import time
+
+          last = None
+          for attempt in range(3):
+              try:
+                  model = WhisperModel('tiny', device='cpu', compute_type='int8')
+                  print(f'Whisper tiny initialized: {type(model).__name__}')
+                  break
+              except Exception as exc:
+                  last = exc
+                  if attempt < 2:
+                      print(f'Whisper initialization attempt {attempt + 1} failed: {exc}')
+                      time.sleep(10 * (attempt + 1))
+          else:
+              raise last
+          PY
