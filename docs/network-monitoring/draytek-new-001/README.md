@@ -157,3 +157,49 @@ Sau khi xác nhận thiết bị, mới ghi nhận sơ đồ LAN/WAN và lập p
 6. Sau khi khảo sát topology hai đầu, mới chốt thông số VPN LAN-to-LAN.
 
 **Chưa thay đổi cấu hình LAN, WAN, VPN hoặc SNMP ở bước này.**
+
+
+## 10. Nhật ký bằng chứng – NEW-IMG-002
+
+<small>Ảnh người dùng gửi ngày 2026-11-26 · WAN → Internet Access → WAN1</small>
+
+### 10.1. Cấu hình WAN1 đọc từ ảnh
+
+| Thuộc tính | Giá trị hiển thị | Ghi chú |
+|---|---|---|
+| WAN1 | Enable | WAN1 đang bật |
+| Access type | PPPoE | Tab PPPoE được chọn |
+| PPP Authentication | PAP/CHAP/MS-CHAP/MS-CHAPv2 | Các phương thức được cho phép |
+| Idle Timeout | -1 second(s) | Ghi đúng giá trị giao diện |
+| IP Assignment (IPCP) | Dynamic | Không chọn Static |
+| Fixed IP Address | Trống | Không khai báo |
+| WAN IP Alias | Không xác định/không khai báo | Nút cấu hình riêng |
+| WAN Connection Detection | PPP Detect | Chế độ phát hiện kết nối |
+| MTU | 1438 | Giá trị đang cấu hình |
+| Path MTU Discovery | Nút Detect | Ảnh không thể hiện kết quả Detect |
+| Dial-Out Schedule | None | Các ô lịch đều None |
+| TTL override | Không bật | Checkbox không chọn |
+| MAC Address | Default MAC Address | Không chọn Specify a MAC Address |
+
+**Thông tin xác thực:** ảnh có hiển thị PPPoE username và password bị che. Không sao chép username/password vào tài liệu triển khai; không cần gửi mật khẩu cho quá trình khảo sát.
+
+### 10.2. Nhận định kỹ thuật – chỉ dựa trên bằng chứng hiện có
+
+- WAN1 đang được cấu hình PPPoE và IPCP Dynamic.
+- Dashboard trước đó hiển thị WAN1 có IP `14.161.37.40`; ảnh cấu hình này không hiển thị gateway, DNS hoặc trạng thái IP cố định.
+- Chưa đủ bằng chứng để kết luận IP WAN1 là static/dynamic từ ISP, có bị NAT/CGNAT hay không, hoặc có thể nhận kết nối VPN từ Internet.
+- MTU hiện tại là 1438. Chưa thay đổi MTU; khi triển khai IPsec cần kiểm tra MTU/MSS end-to-end trước khi quyết định điều chỉnh.
+
+### 10.3. Trạng thái
+
+**Đã ghi nhận:** WAN1 PPPoE Enable, IPCP Dynamic, MTU 1438, PPP Detect, Default MAC.
+
+**Chưa ghi nhận:** Default Gateway, DNS, PPPoE public IP ownership/static lease, ISP NAT/CGNAT, IPsec reachability từ Internet, thông tin WAN2 và thiết bị upstream.
+
+**Không thực hiện thay đổi cấu hình.** Không lưu/nhấn OK trong trang cấu hình ở bước khảo sát này.
+
+### 10.4. Bước tiếp theo
+
+Mở **WAN → Internet Access → Static or Dynamic IP** của WAN1 và gửi ảnh trang đó để kiểm tra các thông tin IP/gateway/DNS nếu giao diện có cung cấp. Nếu trang này không có thông tin WAN1 đang dùng, ta sẽ lấy trạng thái thực tế tại **Online Status → Physical Connection** hoặc **Online Status → WAN** (tùy menu firmware).
+
+Sau đó khảo sát WAN2 và topology phía ISP trước khi thiết kế VPN.
