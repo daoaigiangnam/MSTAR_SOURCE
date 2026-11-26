@@ -308,3 +308,50 @@ WAN2: không sử dụng, hiện Disable.
 Trước khi tạo VPN, cần chốt mạng đích và đầu cuối VPN ở trung tâm. Không lấy thông số từ thiết bị DrayTek cũ làm mặc định cho thiết bị mới.
 
 **Cần người vận hành xác nhận:** modem mới này có kết nối VPN về cùng máy chủ Ubuntu/Zabbix trung tâm đã dùng ở triển khai trước không? Nếu đúng, cung cấp/đối chiếu địa chỉ public peer và subnet đích hiện tại của trung tâm trước khi cấu hình.
+
+
+## 13. Nhật ký bằng chứng – NEW-IMG-004
+
+<small>Ảnh người dùng gửi ngày 2026-11-26 · VPN and Remote Access → LAN to LAN</small>
+
+### 13.1. Danh sách LAN-to-LAN đang hiển thị
+
+| Thuộc tính | Giá trị đọc được |
+|---|---|
+| Profile index | 1 |
+| Enable | Được chọn |
+| Name | S2S |
+| Remote Network | 192.168.2.0/24 |
+| Status | Online |
+
+Các profile còn lại trong phần ảnh nhìn thấy (index 2–16 và 17–32) không được bật; một số tên hiển thị NordVPN hoặc ???. Không suy luận cấu hình chi tiết của các profile này.
+
+### 13.2. Tùy chọn định tuyến chung đang hiển thị
+
+| Tùy chọn | Trạng thái |
+|---|---|
+| Change default route to | None |
+| Pass packets from LAN in Routing mode to VPN | Không chọn |
+| Pass Packets to WAN when VPN disconnects | Được chọn |
+
+### 13.3. Nhận định và giới hạn
+
+- Có một profile LAN-to-LAN tên S2S đang Enable và Status Online, với Remote Network 192.168.2.0/24.
+- Đây là bằng chứng cho thấy thiết bị đang có một profile VPN hoạt động, nhưng ảnh danh sách không cho biết Local Network, VPN peer, giao thức/IKE proposal, xác thực, thuật toán mã hóa, thời gian sống SA, DPD, NAT-T hay trạng thái traffic hai chiều.
+- Chưa xác định profile S2S này có phải VPN kết nối về máy chủ Ubuntu/Zabbix trung tâm hay là kết nối tới một mạng khác.
+- Không chỉnh sửa profile, không nhấn OK, không thay đổi default route hoặc các checkbox ở trang này.
+- Tùy chọn "Pass Packets to WAN when VPN disconnects" đang bật; ghi nhận nguyên trạng, chưa đánh giá chính sách fail-open/fail-closed cho đến khi biết mục đích và luồng mạng cần bảo vệ.
+
+### 13.4. Bước tiếp theo – kiểm tra chi tiết profile S2S
+
+Mở profile **Index 1 / S2S** bằng cách nhấp vào số **1** ở cột Index. Chụp toàn bộ trang cấu hình profile, có thể chia thành nhiều ảnh nếu trang dài. Che các trường PSK/password/secret trước khi gửi.
+
+Cần thu thập:
+- Enable, profile name, Call Direction (Dial-Out/Dial-In), WAN binding.
+- VPN server/remote gateway/peer address.
+- Local Network và Remote Network.
+- IKE version, authentication method, encryption/hash, DH/PFS.
+- NAT-T, DPD/keepalive, SA lifetime.
+- Các tùy chọn VPN liên quan khác.
+
+**Chưa có căn cứ để kết luận đây là tunnel về Zabbix.** Cần xác minh với người vận hành sau khi xem chi tiết profile.
