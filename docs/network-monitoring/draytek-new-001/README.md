@@ -46,9 +46,9 @@ Các giai đoạn dưới đây là khung quản lý công việc. Chỉ chuyể
 
 | STT | Giai đoạn | Trạng thái ban đầu |
 |---:|---|---|
-| 01 | Khảo sát thiết bị, model, firmware, MAC, LAN/WAN | Đang chờ |
+| 01 | Khảo sát thiết bị, model, firmware, MAC, LAN/WAN | Đã xác nhận một phần – NEW-IMG-001 |
 | 02 | Khảo sát topology mạng tại địa điểm | Đang chờ |
-| 03 | Xác định phương án VPN LAN-to-LAN và NAT hai đầu (nếu cần) | Đang chờ |
+| 03 | Xác định phương án VPN LAN-to-LAN và NAT hai đầu (nếu cần) | Đang chờ khảo sát topology |
 | 04 | Cấu hình VPN và kiểm tra tunnel/selectors | Đang chờ |
 | 05 | Kiểm tra định tuyến và truy cập mạng quản trị | Đang chờ |
 | 06 | Bật/cấu hình SNMP và ACL | Đang chờ |
@@ -94,3 +94,66 @@ Sau khi xác nhận thiết bị, mới ghi nhận sơ đồ LAN/WAN và lập p
 ## 8. Lịch sử chỉnh sửa hồ sơ
 
 - 2026-11-26: Khởi tạo hồ sơ DRAYTEK-NEW-001, đánh dấu bắt đầu triển khai thiết bị DrayTek mới.
+
+
+## 9. Nhật ký bằng chứng – NEW-IMG-001
+
+<small>Ảnh người dùng gửi ngày 2026-11-26 · Trang Dashboard DrayTek</small>
+
+### 9.1. Nhận diện thiết bị đọc từ ảnh
+
+| Thuộc tính | Giá trị nhìn thấy trên ảnh | Trạng thái |
+|---|---|---|
+| Model Name | Vigor2962 | Đã xác nhận |
+| Router Name | DrayTek | Đã xác nhận |
+| Firmware/Loader Version | 4.4.5.1/v24 | Đã xác nhận |
+| Build Date/Time | Aug 6 2025 16:07:54 | Đã xác nhận |
+| LAN MAC Address | 14-49-BC-20-21-10 | Đã xác nhận |
+| System Up Time | 2 days 22:04:00 | Ảnh chụp tại thời điểm hiển thị |
+| Current Time trên router | Thu Nov 26 2026 15:36:06 | Ảnh chụp tại thời điểm hiển thị |
+
+### 9.2. LAN hiện trạng
+
+| Thuộc tính | Giá trị |
+|---|---|
+| LAN interface | LAN1 |
+| IPv4 address | 192.168.1.1/24 |
+| DHCP | Đang bật (dấu chọn hiển thị trên Dashboard) |
+| Subnet | 192.168.1.0/24 |
+
+### 9.3. WAN hiện trạng
+
+| WAN | Line/Mode | IP hiển thị | MAC | Trạng thái |
+|---|---|---|---|---|
+| WAN1 | Ethernet / PPPoE | 14.161.37.40 | 14-49-BC-20-21-11 | Đang kết nối; uptime 2 days 22:03:25 |
+| WAN2 | SFP / DHCP Client | Disconnected | 14-49-BC-20-21-12 | Đang ngắt kết nối |
+
+### 9.4. Tài nguyên hệ thống tại thời điểm chụp
+
+- CPU Usage: 10%.
+- Co-Proc CPU: 1%.
+- Memory Usage: 56%.
+- Session current/max: 1%/2%.
+
+### 9.5. Địa chỉ quản trị thể hiện trên trình duyệt
+
+- URL hiển thị: `https://14.161.37.40:8443`.
+- Trình duyệt hiển thị cảnh báo “Not secure”. Đây là cảnh báo bảo mật chứng chỉ/trình duyệt tại thời điểm chụp; chưa kết luận nguyên nhân.
+- Không coi URL quản trị WAN là thông tin cần mở công khai. Cần giới hạn truy cập quản trị từ WAN theo chính sách bảo mật.
+
+### 9.6. Kết luận bước khảo sát đầu tiên
+
+**Đã xác nhận từ ảnh:** thiết bị là DrayTek Vigor2962, firmware 4.4.5.1/v24, LAN1 192.168.1.1/24, WAN1 PPPoE đang kết nối, WAN2 SFP/DHCP Client đang disconnected.
+
+**Chưa xác nhận:** vị trí/lắp đặt, gateway/thiết bị NAT phía trước, public IP có cố định hay không, subnet tại trung tâm cần kết nối VPN, peer VPN, phương án VPN Dial-Out/Dial-In, cấu hình SNMP, MAC WAN có dùng để nhận diện thiết bị trong registry hay không.
+
+### 9.7. Việc tiếp theo – khảo sát trước khi thay đổi cấu hình
+
+1. Xác nhận đây có đúng là modem mới dự kiến kết nối VPN về trung tâm Zabbix hay không.
+2. Xác nhận LAN 192.168.1.0/24 có đang sử dụng thực tế và có bị trùng subnet với mạng trung tâm không.
+3. Xác định thiết bị này kết nối Internet trực tiếp bằng PPPoE hay còn modem/ONT/Peplink NAT phía trước.
+4. Xác định WAN1 có public IP trực tiếp hay bị NAT/CGNAT; không suy luận chỉ từ địa chỉ đang hiển thị.
+5. Kiểm tra WAN2 có được dự kiến dùng làm đường dự phòng không, hiện tại nó đang disconnected.
+6. Sau khi khảo sát topology hai đầu, mới chốt thông số VPN LAN-to-LAN.
+
+**Chưa thay đổi cấu hình LAN, WAN, VPN hoặc SNMP ở bước này.**
