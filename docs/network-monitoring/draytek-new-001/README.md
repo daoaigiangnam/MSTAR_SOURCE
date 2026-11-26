@@ -203,3 +203,71 @@ Sau khi xác nhận thiết bị, mới ghi nhận sơ đồ LAN/WAN và lập p
 Mở **WAN → Internet Access → Static or Dynamic IP** của WAN1 và gửi ảnh trang đó để kiểm tra các thông tin IP/gateway/DNS nếu giao diện có cung cấp. Nếu trang này không có thông tin WAN1 đang dùng, ta sẽ lấy trạng thái thực tế tại **Online Status → Physical Connection** hoặc **Online Status → WAN** (tùy menu firmware).
 
 Sau đó khảo sát WAN2 và topology phía ISP trước khi thiết kế VPN.
+
+
+## 11. Nhật ký bằng chứng – NEW-IMG-003
+
+<small>Ảnh người dùng gửi ngày 2026-11-26 · Online Status → Physical Connection → IPv4</small>
+
+### 11.1. LAN Status
+
+| Thuộc tính | Giá trị |
+|---|---|
+| LAN IP | 192.168.1.1 |
+| TX Packets | 136,245,736 |
+| RX Packets | 129,040,915 |
+| Router Primary DNS | 123.23.23.23 |
+| Router Secondary DNS | 123.26.26.26 |
+
+### 11.2. WAN1 Status
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Enable | Yes |
+| Line | Ethernet |
+| Name | VNPT |
+| Mode | PPPoE |
+| Up Time | 70:07:10 |
+| IP | 14.161.37.40 |
+| GW IP | 203.210.144.229 |
+| TX Bytes | 141 GB |
+| TX Rate | 29.52 Mbps |
+| RX Bytes | 127 GB |
+| RX Rate | 641.02 Kbps |
+
+### 11.3. WAN2 Status
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Enable | No |
+| Line | Fiber |
+| Mode | DHCP Client |
+| Up Time | 00:00:00 |
+| IP | --- |
+| GW IP | --- |
+| TX/RX Bytes | 0 B / 0 B |
+| TX/RX Rate | 0 |
+
+### 11.4. Nhận định
+
+- WAN1 đang hoạt động với PPPoE, tên đường truyền VNPT, IP 14.161.37.40 và gateway hiển thị 203.210.144.229.
+- WAN2 hiện không được Enable và chưa có địa chỉ IP; không chỉ là trạng thái mất link. Cần xác nhận có chủ đích để tắt WAN2 hay không.
+- Router DNS hiển thị 123.23.23.23 và 123.26.26.26.
+- WAN1 Up Time trên trang trạng thái là 70:07:10, khác với thời điểm uptime ở Dashboard trước đó; ghi nhận đúng theo từng ảnh, chưa suy luận nguyên nhân.
+- Trang này cho biết gateway nhưng chưa xác định WAN1 có public IP trực tiếp hay có NAT/CGNAT. Cần đối chiếu với IP public quan sát từ một dịch vụ Internet độc lập hoặc xác nhận từ ISP; không suy luận chỉ dựa trên dải IP.
+
+### 11.5. Trạng thái bước khảo sát
+
+**Đã xác nhận:** LAN IP, router DNS, WAN1 enable/PPPoE/VNPT/IP/Gateway, WAN2 disable/DHCP Client chưa có IP.
+
+**Chưa xác nhận:** public IP trực tiếp hay NAT/CGNAT; WAN2 có được dự kiến sử dụng dự phòng hay không; thiết bị upstream và sơ đồ kết nối vật lý; subnet và IP endpoint phía trung tâm.
+
+**Không thay đổi cấu hình.**
+
+### 11.6. Bước tiếp theo
+
+Cần xác nhận hai thông tin topology trước khi thiết kế VPN:
+1. Đường WAN1 VNPT có cắm trực tiếp vào cổng WAN1 DrayTek từ ONT/modem nhà mạng ở chế độ bridge, hay đi qua một router/NAT khác?
+2. WAN2 đang Disable là do không sử dụng, hay sẽ triển khai làm đường Internet dự phòng?
+
+Sau khi có câu trả lời, tiếp tục khảo sát VPN target và subnet phía trung tâm; chưa bật WAN2 hoặc thay đổi cấu hình.
