@@ -2,6 +2,36 @@
 
 Tài liệu ghi lại các bước đã thực hiện theo trình tự, phân biệt kết quả đã xác nhận và phần còn tồn tại. Không dùng tài liệu này để khẳng định các hạng mục chưa kiểm thử là đã hoàn thành.
 
+## Giai đoạn 0 – Thiết lập VPN LAN-to-LAN DrayTek ↔ trung tâm Zabbix
+
+Đây là công đoạn nền tảng trước khi SNMP polling hoạt động.
+
+### Topology và NAT đã ghi nhận
+- DrayTek Vigor2962 phía thiết bị, LAN 192.168.105.0/24, router LAN 192.168.105.1.
+- DrayTek WAN1: 113.161.92.1; WAN2: 14.161.4.84.
+- Ubuntu/Coolify ở trung tâm có IP LAN 192.168.100.8, phía sau Peplink.
+- Peplink public WAN3: 27.74.254.52.
+- NAT/port forwarding UDP/500 và UDP/4500 từ Peplink về Ubuntu 192.168.100.8 để phục vụ IKE/IPsec NAT-T.
+
+### VPN profile trên DrayTek
+- Profile LAN-to-LAN tên `VPN-ZABBIX`.
+- Kiểu kết nối: Dial-Out.
+- IKEv2/IPsec, xác thực PSK.
+- Proposal ghi nhận: AES-CBC-256, SHA2-256, DH Group 14 (MODP-2048).
+- WAN policy: WAN1 First, WAN2 fallback.
+- Local selector: 192.168.105.0/24.
+- Remote selector ban đầu: 172.20.0.3/32 (Zabbix container tại giai đoạn đầu).
+
+### Đầu Ubuntu/strongSwan và cập nhật selector
+- Ubuntu dùng strongSwan làm đầu VPN trung tâm.
+- Selector phía trung tâm là IP Zabbix namespace /32; selector phía DrayTek là 192.168.105.0/24.
+- Sau khi network namespace/container IP thay đổi, selector remote/local tương ứng được cập nhật từ 172.20.0.3/32 sang 172.21.0.2/32.
+- Trạng thái cuối được ghi nhận trong cấu hình vận hành: `172.21.0.2/32 === 192.168.105.0/24`.
+- SNMP query từ Zabbix namespace 172.21.0.2 tới DrayTek 192.168.105.1 đã thành công qua VPN.
+
+### Giới hạn bằng chứng
+Ảnh gốc và bản cấu hình strongSwan cuối cùng chưa có đủ trong tư liệu truy xuất hiện tại để chép chính xác từng directive, lifetime, DPD, PFS, NAT-T options hoặc lệnh restart. Không tự tạo file cấu hình thay thế. Runbook chi tiết có danh sách ảnh cần bổ sung và các tham số đã xác nhận.
+
 ## Giai đoạn 1 – Xác định topology và đường mạng
 
 ### Môi trường
