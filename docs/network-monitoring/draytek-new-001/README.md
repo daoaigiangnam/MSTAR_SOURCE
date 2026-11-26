@@ -271,3 +271,40 @@ Cần xác nhận hai thông tin topology trước khi thiết kế VPN:
 2. WAN2 đang Disable là do không sử dụng, hay sẽ triển khai làm đường Internet dự phòng?
 
 Sau khi có câu trả lời, tiếp tục khảo sát VPN target và subnet phía trung tâm; chưa bật WAN2 hoặc thay đổi cấu hình.
+
+
+## 12. Xác nhận topology từ người vận hành – 2026-11-26
+
+Người vận hành xác nhận:
+- **Câu 1 – phương án A:** ONT/modem VNPT chuyển Bridge; đường Ethernet từ ONT/modem VNPT kết nối trực tiếp vào cổng WAN1 DrayTek.
+- **Câu 2 – phương án A:** WAN2 không sử dụng.
+
+### 12.1. Sơ đồ kết nối hiện tại (theo xác nhận)
+
+```text
+Internet VNPT
+    |
+ONT/Modem VNPT (Bridge)
+    | Ethernet
+    v
+DrayTek Vigor2962 – WAN1 (PPPoE)
+    |
+LAN1: 192.168.1.1/24
+    |
+Mạng LAN tại địa điểm
+```
+
+WAN2: không sử dụng, hiện Disable.
+
+### 12.2. Kết luận và giới hạn
+
+- WAN1 PPPoE trực tiếp trên DrayTek; không có router/NAT trung gian do người vận hành mô tả ở nhánh WAN1.
+- WAN2 không nằm trong phương án dự phòng ở giai đoạn hiện tại.
+- Cần xác minh với ISP hoặc đối chiếu IP public từ một nguồn độc lập để biết IP PPPoE có phải public IP trực tiếp và có ổn định hay không. Trạng thái bridge không tự nó chứng minh không có CGNAT.
+- Không thay đổi cấu hình WAN1/WAN2.
+
+### 12.3. Bước tiếp theo – khảo sát VPN phía trung tâm
+
+Trước khi tạo VPN, cần chốt mạng đích và đầu cuối VPN ở trung tâm. Không lấy thông số từ thiết bị DrayTek cũ làm mặc định cho thiết bị mới.
+
+**Cần người vận hành xác nhận:** modem mới này có kết nối VPN về cùng máy chủ Ubuntu/Zabbix trung tâm đã dùng ở triển khai trước không? Nếu đúng, cung cấp/đối chiếu địa chỉ public peer và subnet đích hiện tại của trung tâm trước khi cấu hình.
