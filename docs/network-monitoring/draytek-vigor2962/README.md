@@ -4,7 +4,8 @@ Tài liệu này tổng hợp **toàn bộ quá trình triển khai từ đầu 
 
 ## Lịch sử triển khai và tài liệu
 
-1. [Lịch sử triển khai từ đầu đến hiện tại](12-implementation-history.md)
+1. [Quy trình triển khai chi tiết theo trình tự, kèm danh mục ảnh minh chứng](13-detailed-implementation-runbook.md)
+2. [Lịch sử triển khai từ đầu đến hiện tại](12-implementation-history.md)
 2. [Kiến trúc tổng thể](01-architecture.md)
 3. [Chuẩn bị DrayTek](02-device-preparation.md)
 4. [Khai báo Host trên Zabbix](03-zabbix-host-configuration.md)
