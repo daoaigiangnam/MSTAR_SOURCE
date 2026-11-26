@@ -355,3 +355,61 @@ Cần thu thập:
 - Các tùy chọn VPN liên quan khác.
 
 **Chưa có căn cứ để kết luận đây là tunnel về Zabbix.** Cần xác minh với người vận hành sau khi xem chi tiết profile.
+
+
+## 14. Nhật ký bằng chứng – NEW-IMG-005
+
+<small>Ảnh người dùng gửi ngày 2026-11-26 · Chi tiết VPN and Remote Access → LAN to LAN</small>
+
+### 14.1. Profile đang mở
+
+| Thuộc tính | Giá trị nhìn thấy |
+|---|---|
+| Profile Index | 3 |
+| Enable this profile | Được chọn |
+| Profile Name | VPN-ZABBIX |
+| Call Direction | Dial-Out |
+| Dial-Out Through | WAN1 First |
+| WAN binding hiển thị | 1 - 14.161.37.40 |
+| Always on | Enable |
+| Idle Timeout | -1 seconds |
+| Quality Monitoring/Keep Alive | Không bật |
+| VPN Server Type | IPsec Tunnel |
+| IKE Version | IKEv2 |
+| Server IP/Host Name | hhi.mailinh.vn |
+| IKE Mode | Main mode |
+| Authentication | Pre-Shared Key |
+| IKE Phase 1 Proposal Encryption | Auto |
+| IKE Phase 1 DH Group | Group 14 (2048 bit) |
+| IKE Phase 1 Authentication | SHA256 |
+| Force UDP Encapsulation | Không bật |
+| Force Reauthentication | Không bật |
+| IKE Phase 2 Security Protocol | ESP |
+| IKE Phase 2 Encryption | AES256-CBC |
+| IKE Phase 2 Authentication | All |
+| Ping to Keep Alive | Không bật |
+| Local Network | 192.168.1.1 / 255.255.255.0 (/24) |
+| Remote Network | 172.21.0.2 / 255.255.255.255 (/32) |
+| Mode | Routing |
+| RIP via VPN | Disable |
+| Translate Local Network | Không bật |
+| Change Default Route to this VPN tunnel | Không bật |
+
+### 14.2. Bảo mật và giới hạn đọc ảnh
+
+- Pre-Shared Key được che; tuyệt đối không ghi giá trị bí mật vào tài liệu.
+- Ảnh chỉ hiển thị phần trên và một phần TCP/IP Network Settings; các trường nằm phía dưới chưa được xác nhận.
+- Không có trạng thái Online/Offline của profile này trong trang chi tiết.
+- Danh sách profile ở ảnh NEW-IMG-004 thể hiện S2S ở Index 1, còn ảnh chi tiết NEW-IMG-005 đang mở Profile Index 3 tên VPN-ZABBIX. Đây là hai profile khác nhau; không được coi Index 3 là profile S2S Index 1.
+- Profile VPN-ZABBIX dùng remote selector 172.21.0.2/32, trùng với địa chỉ Zabbix Server namespace đã dùng ở hệ thống trước; đây là dấu hiệu cần xác minh, không đủ để kết luận tunnel này đang kết nối thành công hoặc chắc chắn thuộc hệ thống trung tâm.
+- Host peer `hhi.mailinh.vn` được ghi đúng như ảnh; cần xác minh DNS hiện tại và peer endpoint trước khi sử dụng.
+
+### 14.3. Không thay đổi cấu hình
+
+Không nhấn OK, không đổi profile, PSK, peer, selector, IKE/ESP proposal hoặc routing. Chưa có yêu cầu thay đổi được xác nhận.
+
+### 14.4. Bước tiếp theo
+
+1. Nếu mục tiêu là xem profile **S2S Index 1** trong danh sách trước, quay lại trang danh sách LAN-to-LAN và nhấp đúng liên kết số **1** ở cột Index; kiểm tra tiêu đề phải ghi `Profile Index: 1`.
+2. Nếu mục tiêu là khảo sát profile **VPN-ZABBIX Index 3**, tiếp tục chụp phần dưới trang hiện tại để ghi nhận các trường còn lại, không lưu cấu hình.
+3. Xác minh với người vận hành profile nào là VPN cần sử dụng cho dự án mới. Không chỉnh sửa profile đang có.
