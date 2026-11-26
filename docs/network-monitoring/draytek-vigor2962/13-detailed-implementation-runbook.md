@@ -37,6 +37,100 @@
 
 ---
 
+## 0A. Thiết lập VPN LAN-to-LAN giữa DrayTek và trung tâm Zabbix
+
+### Mục tiêu
+Tạo đường hầm IPsec site-to-site để Zabbix Server ở trung tâm có thể truy cập mạng quản trị DrayTek qua SNMP. Đây là một công đoạn riêng, phải được ghi trước phần kiểm tra SNMP; không thể bỏ qua như bản trước.
+
+### Bối cảnh mạng đã ghi nhận trong quá trình cấu hình
+| Thành phần | Thông tin |
+|---|---|
+| Router phía thiết bị | DrayTek Vigor2962 |
+| DrayTek LAN | 192.168.105.0/24 |
+| DrayTek LAN IP | 192.168.105.1 |
+| DrayTek WAN1 | 113.161.92.1 |
+| DrayTek WAN2 | 14.161.4.84 |
+| Trung tâm | Ubuntu/Coolify host phía sau Peplink/NAT |
+| Ubuntu host | 192.168.100.8 |
+| Peplink public WAN3 | 27.74.254.52 |
+| VPN profile trên DrayTek | VPN-ZABBIX |
+| Kiểu kết nối phía DrayTek | Dial-Out |
+| IKE | IKEv2 |
+| Xác thực | IPsec Pre-Shared Key (PSK), giá trị là secret |
+| Thuật toán ghi nhận | AES-CBC-256 / SHA2-256 / DH Group 14 (MODP-2048) |
+| WAN policy | WAN1 First, WAN2 fallback |
+| Remote selector ban đầu | 172.20.0.3/32 |
+| Remote selector sau khi thay đổi namespace | 172.21.0.2/32 |
+| Local selector DrayTek | 192.168.105.0/24 |
+
+### Lưu ý về thay đổi địa chỉ Zabbix
+Trong giai đoạn đầu, Zabbix container được ghi nhận có IP 172.20.0.3 và selector remote là 172.20.0.3/32. Ở trạng thái triển khai được xác nhận sau đó, Zabbix Server dùng network namespace IP 172.21.0.2 và selector là 172.21.0.2/32. Đây là thay đổi theo địa chỉ thực tế của container/network namespace, không được ghi hai giá trị như thể cùng tồn tại đồng thời. Khi cấu hình hoặc khôi phục, phải đối chiếu IP hiện tại bằng Docker trước rồi mới đặt selector.
+
+### Trình tự cấu hình đã ghi nhận
+
+#### Phần A – Chuẩn bị NAT phía trung tâm
+1. Xác định Ubuntu/Coolify host ở địa chỉ LAN 192.168.100.8.
+2. Xác định Peplink public WAN3 là 27.74.254.52.
+3. Cấu hình NAT/port forwarding trên Peplink để chuyển UDP/500 và UDP/4500 về Ubuntu 192.168.100.8.
+4. Bảo đảm firewall trên Ubuntu cho phép lưu lượng IKE/IPsec cần thiết.
+5. Không mở các cổng này rộng hơn yêu cầu; giới hạn nguồn nếu kiến trúc WAN thực tế cho phép.
+
+> Bằng chứng cần gắn: ảnh Peplink WAN3/public IP; ảnh NAT/port-forward UDP 500 và UDP 4500 trỏ đến 192.168.100.8; ảnh firewall Ubuntu.
+
+#### Phần B – Tạo VPN profile trên DrayTek
+1. Đăng nhập giao diện quản trị Vigor2962.
+2. Mở phần VPN and Remote Access và tạo profile LAN-to-LAN.
+3. Đặt tên profile: `VPN-ZABBIX`.
+4. Chọn kiểu kết nối phía DrayTek là Dial-Out.
+5. Chọn IKEv2/IPsec.
+6. Chọn xác thực Pre-Shared Key; nhập PSK đã thống nhất ở hai đầu. Không ghi PSK vào tài liệu/ảnh.
+7. Cấu hình proposal đã ghi nhận: AES-CBC-256, SHA2-256, DH Group 14 (MODP-2048).
+8. Chọn WAN1 First; cấu hình WAN2 làm đường dự phòng theo chính sách WAN đã thiết lập.
+9. Đặt Local Network/Local ID phía DrayTek là 192.168.105.0/24.
+10. Đặt Remote Network/Remote ID ban đầu là IP Zabbix namespace /32 (ban đầu 172.20.0.3/32; sau cập nhật thành 172.21.0.2/32).
+11. Lưu profile và thực hiện Dial-Out/kết nối.
+12. Kiểm tra trạng thái tunnel và thông tin SA ở DrayTek.
+
+Tên menu/nhãn trường có thể khác theo firmware; các giá trị kỹ thuật ở bảng trên là dữ liệu đã ghi nhận. Những tham số lifetime, DPD, PFS, NAT keepalive và các checkbox khác không có bằng chứng đủ trong hồ sơ hiện tại nên không tự điền.
+
+> Bằng chứng cần gắn: ảnh profile VPN-ZABBIX phần General; Dial-Out; IKE version; Authentication/PSK (che secret); proposal; Local/Remote network; WAN1/WAN2 policy; trạng thái tunnel/SA.
+
+#### Phần C – Cấu hình IPsec phía Ubuntu
+1. Cấu hình strongSwan trên Ubuntu làm đầu VPN trung tâm.
+2. Khai báo peer/remote gateway tương ứng với public endpoint của DrayTek và NAT-T.
+3. Khai báo IKEv2, PSK và proposal tương thích với DrayTek: AES-CBC-256, SHA2-256, DH Group 14.
+4. Khai báo local selector là địa chỉ Zabbix namespace /32; remote selector là 192.168.105.0/24.
+5. Cập nhật selector local khi IP namespace chuyển từ 172.20.0.3 sang 172.21.0.2.
+6. Kiểm tra cấu hình, nạp lại strongSwan và xem trạng thái SA.
+7. Không tự dựng lại nội dung file `ipsec.conf` hoặc `swanctl.conf` từ tài liệu này vì bản cấu hình đầy đủ cuối cùng chưa được lưu trong tư liệu có thể đối chiếu. Phải lấy file thực tế đã triển khai/ảnh chụp cấu hình để bổ sung nguyên văn.
+
+> Bằng chứng cần gắn: ảnh/file cấu hình strongSwan đã che PSK; output kiểm tra cấu hình; trạng thái `ipsec statusall` hoặc lệnh tương ứng; log xác lập IKE_SA/CHILD_SA.
+
+#### Phần D – Kiểm tra kết nối hai chiều theo selector
+1. Xác nhận tunnel đã established ở cả DrayTek và Ubuntu.
+2. Xác nhận CHILD_SA selector đúng:
+   - Trung tâm: 172.21.0.2/32 ở trạng thái hiện tại.
+   - Phía DrayTek: 192.168.105.0/24.
+3. Thử kết nối tới 192.168.105.1 từ đúng network namespace Zabbix.
+4. Kiểm tra route và firewall nếu tunnel established nhưng traffic không đi qua.
+5. Sau khi kết nối IP được xác nhận, mới thử SNMP UDP/161.
+6. Ghi lại thời gian kiểm tra, địa chỉ nguồn, đích, giao thức và kết quả.
+
+### Kết quả đã xác nhận ở giai đoạn sau
+- SNMP query từ Zabbix namespace 172.21.0.2 tới DrayTek 192.168.105.1 đã thành công qua VPN.
+- Vì vậy tunnel và selector tại trạng thái sau cùng đã đủ để phục vụ SNMP polling.
+- Không dùng kết quả ping đơn lẻ làm bằng chứng duy nhất; SNMP query thực tế là bằng chứng ứng dụng mạnh hơn.
+
+### Các chi tiết cần bổ sung từ ảnh gốc
+- Public peer IP/hostname phía DrayTek được khai báo chính xác.
+- File cấu hình strongSwan cuối cùng và tên connection.
+- Lệnh reload/restart strongSwan chính xác đã dùng.
+- Chi tiết NAT-T/DPD/lifetime/PFS nếu có cấu hình.
+- Ảnh trạng thái VPN tunnel và SA ở hai đầu.
+- Kết quả ping/traceroute/tcpdump nếu đã thực hiện.
+
+---
+
 ## 1. Khảo sát topology và xác định đường đi
 
 ### Mục tiêu
